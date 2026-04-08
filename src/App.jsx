@@ -18,12 +18,21 @@ export default function MovieWatchlist() {
 
   const saveMovie = (movie) => {
     setWatchLater((prev) => [...prev, movie]);
+    alert("added succesfully");
   };
+  function showList() {
+    return alert(
+      `${watchlater.map((list) => {
+        return list.Title;
+      })}`,
+    );
+  }
 
   return (
     <div className="app">
       <header className="header">
         <h1 className="logo">Watchlist</h1>
+        <button onClick={showList}>show watchlist movies</button>
         <form className="search-form">
           <input
             className="search-input"
