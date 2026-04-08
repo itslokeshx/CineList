@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 export default function MovieWatchlist() {
   const [query, setQuery] = useState("good will hunting");
   const [result, setResult] = useState([]);
-  const [watchlater, setWatchLater] = useState("");
+  const [watchlater, setWatchLater] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
@@ -14,28 +15,52 @@ export default function MovieWatchlist() {
     };
     fetchData();
   }, [query]);
+
+  const saveMovie = (movie) => {
+    setWatchLater((prev) => [...prev, movie]);
+  };
+
   return (
-    <div>
-      <form>
-        <h1>Search the movie you want!</h1>
-        <input
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-          }}
-        ></input>
-      </form>
-      {result.Search &&
-        result.Search.map((res) => {
-          return (
-            <div key={res.imdbID}>
-              {res.Poster !== "N/A" && <img src={res.Poster} />}
-              <h4>{res.Title}</h4>
-              <p>{res.Year}</p>
-              <p>{res.Type}</p>
-            </div>
-          );
-        })}
+    <div className="app">
+      <header className="header">
+        <h1 className="logo">Watchlist</h1>
+        <form className="search-form">
+          <input
+            className="search-input"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search movies..."
+          />
+        </form>
+      </header>
+
+      <main className="results-grid">
+        {result.Search &&
+          result.Search.map((res) => {
+            return (
+              <div className="movie-card" key={res.imdbID}>
+                {res.Poster !== "N/A" ? (
+                  <img
+                    className="movie-poster"
+                    src={res.Poster}
+                    alt={res.Title}
+                  />
+                ) : (
+                  <div className="no-poster">No Poster</div>
+                )}
+                <div className="movie-info">
+                  <h4 className="movie-title">{res.Title}</h4>
+                  <p className="movie-meta">
+                    {res.Year} · {res.Type}
+                  </p>
+                  <button className="save-btn" onClick={() => saveMovie(res)}>
+                    + Watchlist
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+      </main>
     </div>
   );
 }
