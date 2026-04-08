@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 export default function MovieWatchlist() {
-  const [query, setQuery] = useState("fightclub");
+  const [query, setQuery] = useState("good will hunting");
   const [result, setResult] = useState([]);
   const [watchlater, setWatchLater] = useState("");
   useEffect(() => {
