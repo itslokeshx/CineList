@@ -18,9 +18,8 @@ export default function Home() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (!query.trim() || query.length < 3) return;
+    if (!query.trim() || query.length < 2) return;
 
-    // Cancel any pending debounce
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
@@ -35,7 +34,7 @@ export default function Home() {
       const data = await response.json();
       setResult(data);
       setLoading(false);
-    }, 500);
+    }, 400);
   };
 
   const clearSearch = () => {
@@ -59,27 +58,27 @@ export default function Home() {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1 className="logo">Save your Movie</h1>
+      <header className="topbar">
+        <h1 className="logo">
+          Cine<span>list</span>
+        </h1>
         <Link to="/watchlist" className="watchlist-link">
           <button className="watchlist-btn">
-            Watchlist {watchlist.length > 0 && `(${watchlist.length})`}
+            Watchlist
+            {watchlist.length > 0 && <span className="count">({watchlist.length})</span>}
           </button>
         </Link>
       </header>
 
-      <section className="hero">
-        <p className="hero-tagline">Discover & Save</p>
-        <h2 className="hero-title">
-          Find your next <span>favorite</span> film
-        </h2>
-        <div className="search-container">
-          <form className="search-form" onSubmit={handleSearch}>
+      <section className="search-section">
+        <label className="search-label">Search for movies</label>
+        <div className="search-wrapper">
+          <form onSubmit={handleSearch} style={{ width: "100%", position: "relative" }}>
             <input
               className="search-input"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search movies..."
+              placeholder="Type a movie title..."
             />
             {query && (
               <button type="button" className="clear-btn" onClick={clearSearch}>
@@ -96,7 +95,7 @@ export default function Home() {
       {loading && (
         <div className="loading">
           <div className="loading-spinner" />
-          <p>Searching for "{searchedFor}"...</p>
+          <p>Searching...</p>
         </div>
       )}
 
@@ -108,33 +107,36 @@ export default function Home() {
       )}
 
       {!loading && result.Search && (
-        <main className="results-grid">
-          {result.Search.map((res) => (
-            <div className="movie-card" key={res.imdbID}>
-              {res.Poster !== "N/A" ? (
-                <img
-                  className="movie-poster"
-                  src={res.Poster}
-                  alt={res.Title}
-                />
-              ) : (
-                <div className="no-poster">No Poster</div>
-              )}
-              <div className="movie-info">
-                <h4 className="movie-title">{res.Title}</h4>
-                <p className="movie-meta">
-                  {res.Year} · {res.Type}
-                </p>
-                <button
-                  className={`save-btn ${isSaved(res.imdbID) ? "saved" : ""}`}
-                  onClick={() => saveMovie(res)}
-                >
-                  {isSaved(res.imdbID) ? "Saved" : "Watchlater"}
-                </button>
+        <>
+          <p className="results-label">
+            Results <span className="results-count">({result.totalResults})</span>
+          </p>
+          <main className="results-grid">
+            {result.Search.map((res) => (
+              <div className="movie-card" key={res.imdbID}>
+                {res.Poster !== "N/A" ? (
+                  <img
+                    className="movie-poster"
+                    src={res.Poster}
+                    alt={res.Title}
+                  />
+                ) : (
+                  <div className="no-poster">No Poster</div>
+                )}
+                <div className="movie-info">
+                  <h4 className="movie-title">{res.Title}</h4>
+                  <p className="movie-meta">{res.Year}</p>
+                  <button
+                    className={`save-btn ${isSaved(res.imdbID) ? "saved" : ""}`}
+                    onClick={() => saveMovie(res)}
+                  >
+                    {isSaved(res.imdbID) ? "Saved" : "Watchlater"}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </main>
+            ))}
+          </main>
+        </>
       )}
     </div>
   );
