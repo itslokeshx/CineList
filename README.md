@@ -1,35 +1,68 @@
-# CineList
+# 🎬 Movie Watchlist
 
-A modern movie search and watchlist app built with React. Search for movies and save them to watch later.
+A sleek, modern movie discovery and watchlist management application. Search millions of movies, save your favorites, and keep track of films you want to watch.
 
-## Live Demo
+🔗 **[Live Demo](https://save-your-movie.vercel.app/)**
 
-🔗 **[https://save-your-movie.vercel.app/](https://save-your-movie.vercel.app/)**
+---
 
-## Features
+## ✨ Features
 
-- Instant movie search powered by OMDB API
-- One-click save to watchlist
-- Persistent watchlist stored in localStorage
-- Pagination with load more
-- Fully responsive design
+- **🔍 Powerful Search** - Instant movie search with real-time results powered by OMDB API
+- **⭐ Save to Watchlist** - One-click save functionality for movies you want to watch
+- **💾 Persistent Storage** - Your watchlist is saved locally and persists across sessions
 
-## Quick Start
+---
 
-```bash
-npm install
-npm run dev
+## 📦 Tech Stack
+
+| Technology       | Purpose                      |
+| ---------------- | ---------------------------- |
+| **React 19**     | UI framework                 |
+| **React Router** | Client-side routing          |
+| **Vite**         | Build tool & dev server      |
+| **OMDB API**     | Movie data source            |
+| **localStorage** | Persistent watchlist storage |
+
+---
+
+## 🎯 How to Use
+
+1. **Search** - Enter a movie title in the search bar
+2. **Browse** - Scroll through search results
+3. **Save** - Click the save button to add movies to your watchlist
+4. **Manage** - Visit your watchlist to view all saved movies
+5. **Remove** - Delete movies from your watchlist anytime
+
+---
+
+## 📁 Project Structure
+
+```
+movie-watchlist/
+├── components/
+│   ├── Home.jsx          # Main search page
+│   └── Watchlist.jsx     # Watchlist display
+├── src/
+│   ├── App.jsx           # Main app component
+│   ├── main.jsx          # Entry point
+│   └── styles.css        # Global styles
+├── package.json
+├── vite.config.js
+└── README.md
 ```
 
-Open `http://localhost:5173` in your browser.
+---
 
-## Tech Stack
+## 🌐 API Integration
 
-- React 19
-- React Router
-- Vite
-- OMDB API
+This app uses the **OMDB API** for movie data. To use this app:
 
-## License
+1. Get a free API key from [omdbapi.com](http://www.omdbapi.com/)
+2. Add it to your environment variables (see `.env.example`)
 
-MIT
+---
+
+## 📝 License
+
+MIT License © 2026
