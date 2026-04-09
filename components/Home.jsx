@@ -3,10 +3,14 @@ import { Link } from "react-router-dom";
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState({});
+  const [movies, setMovies] = useState([]);
+  const [totalResults, setTotalResults] = useState(0);
   const [watchlist, setWatchlist] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchedFor, setSearchedFor] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const debounceRef = useRef(null);
 
   useEffect(() => {
@@ -15,6 +19,40 @@ export default function Home() {
       setWatchlist(JSON.parse(saved));
     }
   }, []);
+
+  const fetchMovies = async (searchQuery, page = 1, append = false) => {
+    const url = `https://www.omdbapi.com/?s=${encodeURIComponent(searchQuery)}&page=${page}&apikey=fc847093`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.Response === "True") {
+      // Filter out movies without valid posters
+      const newMovies = (data.Search || []).filter(
+        movie => movie.Poster && movie.Poster !== "N/A"
+      );
+      const total = parseInt(data.totalResults) || 0;
+
+      if (append) {
+        setMovies(prev => [...prev, ...newMovies]);
+        // Check if we've fetched enough pages to potentially have all results
+        // API max is 10 per page, max 100 results (10 pages)
+        setHasMore(page < 10 && (page * 10) < total);
+      } else {
+        setMovies(newMovies);
+        setTotalResults(total);
+        setHasMore(total > 10);
+      }
+    } else {
+      if (!append) {
+        setMovies([]);
+        setTotalResults(0);
+        setHasMore(false);
+      } else {
+        setHasMore(false);
+      }
+    }
+    return data;
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -26,21 +64,37 @@ export default function Home() {
 
     setLoading(true);
     setSearchedFor(query);
+    setCurrentPage(1);
+    setMovies([]);
 
     debounceRef.current = setTimeout(async () => {
-      const response = await fetch(
-        `https://www.omdbapi.com/?s=${query}&apikey=fc847093`,
-      );
-      const data = await response.json();
-      setResult(data);
+      await fetchMovies(query, 1, false);
       setLoading(false);
     }, 400);
   };
 
+  const loadMore = async () => {
+    if (loadingMore) return;
+
+    setLoadingMore(true);
+    const nextPage = currentPage + 1;
+    const data = await fetchMovies(searchedFor, nextPage, true);
+    setCurrentPage(nextPage);
+
+    // If no more results from API, set totalResults to current count
+    if (data.Response !== "True") {
+      setTotalResults(movies.length);
+    }
+
+    setLoadingMore(false);
+  };
+
   const clearSearch = () => {
     setQuery("");
-    setResult({});
+    setMovies([]);
+    setTotalResults(0);
     setSearchedFor("");
+    setCurrentPage(1);
   };
 
   const saveMovie = (movie) => {
@@ -53,6 +107,11 @@ export default function Home() {
   };
 
   const isSaved = (id) => watchlist.some((m) => m.imdbID === id);
+
+  const handleImageError = (e) => {
+    e.target.style.display = 'none';
+    e.target.parentElement.querySelector('.no-poster').style.display = 'flex';
+  };
 
   return (
     <div className="app">
@@ -109,7 +168,7 @@ export default function Home() {
         </div>
       )}
 
-      {!loading && result.Response === "False" && (
+      {!loading && movies.length === 0 && searchedFor && (
         <div className="state-wrap">
           <span className="state-icon">⊘</span>
           <h3 className="state-heading">No results for "{searchedFor}"</h3>
@@ -119,57 +178,70 @@ export default function Home() {
         </div>
       )}
 
-      {!loading && result.Search && (
+      {!loading && movies.length > 0 && (
         <section className="results-section">
           <div className="results-meta">
             <span className="results-label">Results</span>
             <span className="results-divider">—</span>
             <span className="results-count">
-              {result.totalResults} titles found
+              {totalResults} titles found
             </span>
           </div>
           <div className="results-grid">
-            {result.Search.map((res, i) => (
+            {movies.map((movie, i) => (
               <div
                 className="movie-card"
-                key={res.imdbID}
+                key={movie.imdbID}
                 style={{ animationDelay: `${i * 40}ms` }}
               >
                 <div className="poster-wrap">
-                  {res.Poster !== "N/A" ? (
-                    <img
-                      className="movie-poster"
-                      src={res.Poster}
-                      alt={res.Title}
-                    />
-                  ) : (
-                    <div className="no-poster">
-                      <span>◈</span>
-                      <p>No Poster</p>
-                    </div>
-                  )}
+                  <img
+                    className="movie-poster"
+                    src={movie.Poster}
+                    alt={movie.Title}
+                    onError={handleImageError}
+                    loading="lazy"
+                  />
+                  <div className="no-poster" style={{ display: 'none' }}>
+                    <span>◈</span>
+                    <p>No Poster</p>
+                  </div>
                   <div className="poster-overlay">
                     <button
-                      className={`save-btn ${isSaved(res.imdbID) ? "saved" : ""}`}
-                      onClick={() => saveMovie(res)}
+                      className={`save-btn ${isSaved(movie.imdbID) ? "saved" : ""}`}
+                      onClick={() => saveMovie(movie)}
                     >
-                      {isSaved(res.imdbID) ? "✓ Saved" : "+ Save"}
+                      {isSaved(movie.imdbID) ? "✓ Saved" : "+ Save"}
                     </button>
                   </div>
                 </div>
                 <div className="movie-info">
-                  <h4 className="movie-title">{res.Title}</h4>
+                  <h4 className="movie-title">{movie.Title}</h4>
                   <p className="movie-meta">
-                    {res.Year} · <span className="movie-type">{res.Type}</span>
+                    {movie.Year} · <span className="movie-type">{movie.Type}</span>
                   </p>
                 </div>
               </div>
             ))}
           </div>
+          {movies.length < totalResults && (
+            <div className="load-more-wrap">
+              <button className="load-more-btn" onClick={loadMore} disabled={loadingMore}>
+                {loadingMore ? (
+                  <>
+                    <div className="loading-spinner" />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  "Load More"
+                )}
+              </button>
+            </div>
+          )}
         </section>
       )}
 
-      {!loading && !result.Search && !result.Response && (
+      {!loading && movies.length === 0 && !searchedFor && (
         <div className="empty-home">
           <div className="empty-grid">
             {[
