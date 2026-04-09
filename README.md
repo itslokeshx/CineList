@@ -1,4 +1,4 @@
-# 🎬 Movie Watchlist
+# 🎬 CineList
 
 A sleek, modern movie discovery and watchlist management application. Search millions of movies, save your favorites, and keep track of films you want to watch.
 
