@@ -26,17 +26,14 @@ export default function Home() {
     const data = await response.json();
 
     if (data.Response === "True") {
-      // Filter out movies without valid posters
       const newMovies = (data.Search || []).filter(
-        movie => movie.Poster && movie.Poster !== "N/A"
+        (movie) => movie.Poster && movie.Poster !== "N/A",
       );
       const total = parseInt(data.totalResults) || 0;
 
       if (append) {
-        setMovies(prev => [...prev, ...newMovies]);
-        // Check if we've fetched enough pages to potentially have all results
-        // API max is 10 per page, max 100 results (10 pages)
-        setHasMore(page < 10 && (page * 10) < total);
+        setMovies((prev) => [...prev, ...newMovies]);
+        setHasMore(page < 10 && page * 10 < total);
       } else {
         setMovies(newMovies);
         setTotalResults(total);
@@ -74,18 +71,12 @@ export default function Home() {
   };
 
   const loadMore = async () => {
-    if (loadingMore) return;
+    if (loadingMore || !hasMore) return;
 
     setLoadingMore(true);
     const nextPage = currentPage + 1;
-    const data = await fetchMovies(searchedFor, nextPage, true);
+    await fetchMovies(searchedFor, nextPage, true);
     setCurrentPage(nextPage);
-
-    // If no more results from API, set totalResults to current count
-    if (data.Response !== "True") {
-      setTotalResults(movies.length);
-    }
-
     setLoadingMore(false);
   };
 
@@ -95,6 +86,7 @@ export default function Home() {
     setTotalResults(0);
     setSearchedFor("");
     setCurrentPage(1);
+    setHasMore(true);
   };
 
   const saveMovie = (movie) => {
@@ -108,9 +100,8 @@ export default function Home() {
 
   const isSaved = (id) => watchlist.some((m) => m.imdbID === id);
 
-  const handleImageError = (e) => {
-    e.target.style.display = 'none';
-    e.target.parentElement.querySelector('.no-poster').style.display = 'flex';
+  const handleImageError = (imdbID) => {
+    setMovies((prev) => prev.filter((m) => m.imdbID !== imdbID));
   };
 
   return (
@@ -183,9 +174,7 @@ export default function Home() {
           <div className="results-meta">
             <span className="results-label">Results</span>
             <span className="results-divider">—</span>
-            <span className="results-count">
-              {totalResults} titles found
-            </span>
+            <span className="results-count">{totalResults} titles found</span>
           </div>
           <div className="results-grid">
             {movies.map((movie, i) => (
@@ -199,13 +188,9 @@ export default function Home() {
                     className="movie-poster"
                     src={movie.Poster}
                     alt={movie.Title}
-                    onError={handleImageError}
+                    onError={() => handleImageError(movie.imdbID)}
                     loading="lazy"
                   />
-                  <div className="no-poster" style={{ display: 'none' }}>
-                    <span>◈</span>
-                    <p>No Poster</p>
-                  </div>
                   <div className="poster-overlay">
                     <button
                       className={`save-btn ${isSaved(movie.imdbID) ? "saved" : ""}`}
@@ -218,15 +203,20 @@ export default function Home() {
                 <div className="movie-info">
                   <h4 className="movie-title">{movie.Title}</h4>
                   <p className="movie-meta">
-                    {movie.Year} · <span className="movie-type">{movie.Type}</span>
+                    {movie.Year} ·{" "}
+                    <span className="movie-type">{movie.Type}</span>
                   </p>
                 </div>
               </div>
             ))}
           </div>
-          {movies.length < totalResults && (
+          {hasMore && (
             <div className="load-more-wrap">
-              <button className="load-more-btn" onClick={loadMore} disabled={loadingMore}>
+              <button
+                className="load-more-btn"
+                onClick={loadMore}
+                disabled={loadingMore}
+              >
                 {loadingMore ? (
                   <>
                     <div className="loading-spinner" />
