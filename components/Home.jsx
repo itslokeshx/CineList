@@ -7,6 +7,9 @@ export default function Home() {
   const [result, setResult] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
 
+  function handleSubmit(e) {
+    e.preventDefault();
+  }
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
@@ -40,7 +43,7 @@ export default function Home() {
         <Link to="/watchlist">
           <button>Go to Watchlist</button>
         </Link>
-        <form className="search-form">
+        <form className="search-form" onSubmit={handleSubmit}>
           <input
             className="search-input"
             value={query}
