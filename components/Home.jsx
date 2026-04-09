@@ -172,9 +172,7 @@ export default function Home() {
       {!loading && movies.length > 0 && (
         <section className="results-section">
           <div className="results-meta">
-            <span className="results-label">Results</span>
-            <span className="results-divider">—</span>
-            <span className="results-count">{totalResults} titles found</span>
+            <span className="results-label">Search Results:</span>
           </div>
           <div className="results-grid">
             {movies.map((movie, i) => (
