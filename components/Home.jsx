@@ -38,7 +38,7 @@ export default function Home() {
   return (
     <div className="app">
       <header className="header">
-        <h1 className="logo">Watchlist</h1>
+        <h1 className="logo">Save your Movie</h1>
         <Link to="/watchlist" className="watchlist-link">
           <button className="watchlist-btn">Go to Watchlist</button>
         </Link>
