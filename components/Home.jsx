@@ -3,7 +3,7 @@ import Watchlist from "./Watchlist.jsx";
 import { Link } from "react-router-dom";
 
 export default function Home() {
-  const [query, setQuery] = useState("Batman");
+  const [query, setQuery] = useState("batman");
   const [result, setResult] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
 
