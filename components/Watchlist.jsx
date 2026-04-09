@@ -66,26 +66,21 @@ export default function Watchlist() {
         </div>
       ) : (
         <div className="watchlist-grid">
-          {watchlist.map((movie, i) => (
-            <div
-              className="watchlist-card"
-              key={movie.imdbID}
-              style={{ animationDelay: `${i * 40}ms` }}
-            >
-              <div className="poster-wrap">
-                {movie.Poster !== "N/A" ? (
+          {watchlist
+            .filter((movie) => movie.Poster !== "N/A")
+            .map((movie, i) => (
+              <div
+                className="watchlist-card"
+                key={movie.imdbID}
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                <div className="poster-wrap">
                   <img
                     className="movie-poster"
                     src={movie.Poster}
                     alt={movie.Title}
                   />
-                ) : (
-                  <div className="no-poster">
-                    <span>◈</span>
-                    <p>No Poster</p>
-                  </div>
-                )}
-                <div className="poster-overlay">
+                  <div className="poster-overlay">
                   <button
                     className="delete-btn"
                     onClick={() => deleteMovie(movie.imdbID)}
