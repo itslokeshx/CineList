@@ -32,19 +32,14 @@ export default function Home() {
       return updated;
     });
   };
-  function showList() {
-    return alert(
-      `${watchlist.map((list) => {
-        return list.Title;
-      })}`,
-    );
-  }
 
   return (
     <div className="app">
       <header className="header">
         <h1 className="logo">Watchlist</h1>
-        <button onClick={showList}>show watchlist movies</button>
+        <Link to="/watchlist">
+          <button>Go to Watchlist</button>
+        </Link>
         <form className="search-form">
           <input
             className="search-input"
