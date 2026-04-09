@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Watchlist from "./Watchlist.jsx";
 import { Link } from "react-router-dom";
 
 export default function Home() {
@@ -40,8 +39,8 @@ export default function Home() {
     <div className="app">
       <header className="header">
         <h1 className="logo">Watchlist</h1>
-        <Link to="/watchlist">
-          <button>Go to Watchlist</button>
+        <Link to="/watchlist" className="watchlist-link">
+          <button className="watchlist-btn">Go to Watchlist</button>
         </Link>
         <form className="search-form" onSubmit={handleSubmit}>
           <input

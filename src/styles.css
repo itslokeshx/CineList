@@ -38,6 +38,28 @@ body {
   letter-spacing: -0.5px;
 }
 
+.watchlist-link {
+  text-decoration: none;
+}
+
+.watchlist-btn {
+  background: #1a1a1d;
+  border: 0.5px solid #2a2a2d;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  color: #e8e6e1;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.watchlist-btn:hover {
+  background: #252528;
+  border-color: #3a3a3d;
+}
+
 .search-form {
   flex: 1;
   max-width: 420px;
@@ -148,7 +170,6 @@ body {
   color: #e8e6e1;
   border-color: #444;
 }
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap");
 
 .watchlist-page {
   max-width: 1200px;
