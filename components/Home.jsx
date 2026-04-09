@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function Home() {
   const [query, setQuery] = useState("Batman");
   const [result, setResult] = useState([]);
-  const [watchlater, setWatchLater] = useState([]);
+  const [watchlist, setWatchlist] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,13 +18,23 @@ export default function Home() {
     fetchData();
   }, [query]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem("watchlist");
+    if (saved) {
+      setWatchlist(JSON.parse(saved));
+    }
+  }, []);
+
   const saveMovie = (movie) => {
-    setWatchLater((prev) => [...prev, movie]);
-    alert("added succesfully");
+    setWatchlist((prev) => {
+      const updated = [...prev, movie];
+      localStorage.setItem("watchlist", JSON.stringify(updated));
+      return updated;
+    });
   };
   function showList() {
     return alert(
-      `${watchlater.map((list) => {
+      `${watchlist.map((list) => {
         return list.Title;
       })}`,
     );
@@ -32,9 +42,6 @@ export default function Home() {
 
   return (
     <div className="app">
-      <Link to="/watchlist">
-        <button>Go to Watchlist</button>
-      </Link>
       <header className="header">
         <h1 className="logo">Watchlist</h1>
         <button onClick={showList}>show watchlist movies</button>
@@ -68,7 +75,9 @@ export default function Home() {
                     {res.Year} · {res.Type}
                   </p>
                   <button className="save-btn" onClick={() => saveMovie(res)}>
-                    + Watchlist
+                    {watchlist.some((m) => m.imdbID === res.imdbID)
+                      ? "Saved"
+                      : "Watchlater"}
                   </button>
                 </div>
               </div>
