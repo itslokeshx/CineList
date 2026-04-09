@@ -17,45 +17,89 @@ export default function Watchlist() {
     localStorage.setItem("watchlist", JSON.stringify(updated));
   };
 
+  const clearAll = () => {
+    setWatchlist([]);
+    localStorage.removeItem("watchlist");
+  };
+
   return (
-    <div className="watchlist-page">
-      <header className="watchlist-header">
+    <div className="app">
+      <header className="topbar">
+        <div className="logo-wrap">
+          <span className="logo-icon">◈</span>
+          <h1 className="logo">
+            Cine<span>list</span>
+          </h1>
+        </div>
         <Link to="/" className="back-btn">
-          ← Back
+          ← Back to search
         </Link>
-        <h1 className="watchlist-title">My Watchlist</h1>
-        <span className="watchlist-count">{watchlist.length} movies</span>
       </header>
 
+      <section className="wl-hero">
+        <div className="wl-hero-left">
+          <p className="hero-eyebrow">Your collection</p>
+          <h2 className="hero-heading">My Watchlist</h2>
+        </div>
+        {watchlist.length > 0 && (
+          <div className="wl-hero-right">
+            <span className="watchlist-count">
+              {watchlist.length} {watchlist.length === 1 ? "film" : "films"}
+            </span>
+            <button className="clear-all-btn" onClick={clearAll}>
+              Clear all
+            </button>
+          </div>
+        )}
+      </section>
+
       {watchlist.length === 0 ? (
-        <div className="empty-state">
-          <p>No movies saved yet!</p>
-          <Link to="/">Search for movies</Link>
+        <div className="state-wrap">
+          <span className="state-icon">⊟</span>
+          <h3 className="state-heading">Your list is empty</h3>
+          <p className="state-text">
+            Search for movies and save them to watch later
+          </p>
+          <Link to="/" className="go-search-btn">
+            Browse movies →
+          </Link>
         </div>
       ) : (
         <div className="watchlist-grid">
-          {watchlist.map((movie) => (
-            <div className="watchlist-card" key={movie.imdbID}>
-              {movie.Poster !== "N/A" ? (
-                <img
-                  className="watchlist-poster"
-                  src={movie.Poster}
-                  alt={movie.Title}
-                />
-              ) : (
-                <div className="no-poster">No Poster</div>
-              )}
-              <div className="watchlist-info">
-                <h4 className="watchlist-movie-title">{movie.Title}</h4>
-                <p className="watchlist-year">
-                  {movie.Year} · {movie.Type}
+          {watchlist.map((movie, i) => (
+            <div
+              className="watchlist-card"
+              key={movie.imdbID}
+              style={{ animationDelay: `${i * 40}ms` }}
+            >
+              <div className="poster-wrap">
+                {movie.Poster !== "N/A" ? (
+                  <img
+                    className="movie-poster"
+                    src={movie.Poster}
+                    alt={movie.Title}
+                  />
+                ) : (
+                  <div className="no-poster">
+                    <span>◈</span>
+                    <p>No Poster</p>
+                  </div>
+                )}
+                <div className="poster-overlay">
+                  <button
+                    className="delete-btn"
+                    onClick={() => deleteMovie(movie.imdbID)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <div className="movie-info">
+                <h4 className="movie-title">{movie.Title}</h4>
+                <p className="movie-meta">
+                  {movie.Year} ·{" "}
+                  <span className="movie-type">{movie.Type}</span>
                 </p>
-                <button
-                  className="delete-btn"
-                  onClick={() => deleteMovie(movie.imdbID)}
-                >
-                  Remove
-                </button>
               </div>
             </div>
           ))}

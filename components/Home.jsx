@@ -45,9 +45,7 @@ export default function Home() {
 
   const saveMovie = (movie) => {
     setWatchlist((prev) => {
-      if (prev.some((m) => m.imdbID === movie.imdbID)) {
-        return prev;
-      }
+      if (prev.some((m) => m.imdbID === movie.imdbID)) return prev;
       const updated = [...prev, movie];
       localStorage.setItem("watchlist", JSON.stringify(updated));
       return updated;
@@ -59,26 +57,38 @@ export default function Home() {
   return (
     <div className="app">
       <header className="topbar">
-        <h1 className="logo">
-          Cine<span>list</span>
-        </h1>
+        <div className="logo-wrap">
+          <span className="logo-icon">◈</span>
+          <h1 className="logo">
+            Cine<span>list</span>
+          </h1>
+        </div>
         <Link to="/watchlist" className="watchlist-link">
           <button className="watchlist-btn">
-            Watchlist
-            {watchlist.length > 0 && <span className="count">({watchlist.length})</span>}
+            <span className="btn-icon">⊟</span>
+            My List
+            {watchlist.length > 0 && (
+              <span className="count">{watchlist.length}</span>
+            )}
           </button>
         </Link>
       </header>
 
-      <section className="search-section">
-        <label className="search-label">Search for movies</label>
-        <div className="search-wrapper">
-          <form onSubmit={handleSearch} style={{ width: "100%", position: "relative" }}>
+      <section className="hero-section">
+        <p className="hero-eyebrow">Your personal cinema</p>
+        <h2 className="hero-heading">
+          Find & save movies
+          <br />
+          you want to watch
+        </h2>
+        <form className="search-form" onSubmit={handleSearch}>
+          <div className="search-wrapper">
+            <span className="search-icon">⊕</span>
             <input
               className="search-input"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type a movie title..."
+              placeholder="Search any movie title..."
             />
             {query && (
               <button type="button" className="clear-btn" onClick={clearSearch}>
@@ -88,55 +98,101 @@ export default function Home() {
             <button type="submit" className="search-btn">
               Search
             </button>
-          </form>
-        </div>
+          </div>
+        </form>
       </section>
 
       {loading && (
-        <div className="loading">
+        <div className="state-wrap">
           <div className="loading-spinner" />
-          <p>Searching...</p>
+          <p className="state-text">Searching for "{searchedFor}"...</p>
         </div>
       )}
 
       {!loading && result.Response === "False" && (
-        <div className="no-results">
-          <h3>No movies found for "{searchedFor}"</h3>
-          <p>Try a different search term</p>
+        <div className="state-wrap">
+          <span className="state-icon">⊘</span>
+          <h3 className="state-heading">No results for "{searchedFor}"</h3>
+          <p className="state-text">
+            Try a different title or check your spelling
+          </p>
         </div>
       )}
 
       {!loading && result.Search && (
-        <>
-          <p className="results-label">
-            Results <span className="results-count">({result.totalResults})</span>
-          </p>
-          <main className="results-grid">
-            {result.Search.map((res) => (
-              <div className="movie-card" key={res.imdbID}>
-                {res.Poster !== "N/A" ? (
-                  <img
-                    className="movie-poster"
-                    src={res.Poster}
-                    alt={res.Title}
-                  />
-                ) : (
-                  <div className="no-poster">No Poster</div>
-                )}
+        <section className="results-section">
+          <div className="results-meta">
+            <span className="results-label">Results</span>
+            <span className="results-divider">—</span>
+            <span className="results-count">
+              {result.totalResults} titles found
+            </span>
+          </div>
+          <div className="results-grid">
+            {result.Search.map((res, i) => (
+              <div
+                className="movie-card"
+                key={res.imdbID}
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                <div className="poster-wrap">
+                  {res.Poster !== "N/A" ? (
+                    <img
+                      className="movie-poster"
+                      src={res.Poster}
+                      alt={res.Title}
+                    />
+                  ) : (
+                    <div className="no-poster">
+                      <span>◈</span>
+                      <p>No Poster</p>
+                    </div>
+                  )}
+                  <div className="poster-overlay">
+                    <button
+                      className={`save-btn ${isSaved(res.imdbID) ? "saved" : ""}`}
+                      onClick={() => saveMovie(res)}
+                    >
+                      {isSaved(res.imdbID) ? "✓ Saved" : "+ Save"}
+                    </button>
+                  </div>
+                </div>
                 <div className="movie-info">
                   <h4 className="movie-title">{res.Title}</h4>
-                  <p className="movie-meta">{res.Year}</p>
-                  <button
-                    className={`save-btn ${isSaved(res.imdbID) ? "saved" : ""}`}
-                    onClick={() => saveMovie(res)}
-                  >
-                    {isSaved(res.imdbID) ? "Saved" : "Watchlater"}
-                  </button>
+                  <p className="movie-meta">
+                    {res.Year} · <span className="movie-type">{res.Type}</span>
+                  </p>
                 </div>
               </div>
             ))}
-          </main>
-        </>
+          </div>
+        </section>
+      )}
+
+      {!loading && !result.Search && !result.Response && (
+        <div className="empty-home">
+          <div className="empty-grid">
+            {[
+              "The Dark Knight",
+              "Whiplash",
+              "The Shawshank Redemption",
+              "Pirates of the Caribbean",
+              "Interstellar",
+              "Good Will Hunting",
+            ].map((t) => (
+              <div
+                key={t}
+                className="suggestion-pill"
+                onClick={() => {
+                  setQuery(t);
+                }}
+              >
+                {t}
+              </div>
+            ))}
+          </div>
+          <p className="empty-hint">or search for something above</p>
+        </div>
       )}
     </div>
   );
