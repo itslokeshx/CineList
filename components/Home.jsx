@@ -236,7 +236,7 @@ export default function Home() {
           <div className="empty-grid">
             {[
               "The Dark Knight",
-              "Whiplash",
+              "Iron Man",
               "The Shawshank Redemption",
               "Pirates of the Caribbean",
               "Interstellar",
