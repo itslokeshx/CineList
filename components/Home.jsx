@@ -1,24 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 export default function Home() {
-  const [query, setQuery] = useState("batman");
-  const [result, setResult] = useState([]);
+  const [query, setQuery] = useState("");
+  const [result, setResult] = useState({});
   const [watchlist, setWatchlist] = useState([]);
-
-  function handleSubmit(e) {
-    e.preventDefault();
-  }
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch(
-        `https://www.omdbapi.com/?s=${query}&apikey=fc847093`,
-      );
-      const data = await response.json();
-      setResult(data);
-    };
-    fetchData();
-  }, [query]);
+  const [loading, setLoading] = useState(false);
+  const [searchedFor, setSearchedFor] = useState("");
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("watchlist");
@@ -26,6 +15,34 @@ export default function Home() {
       setWatchlist(JSON.parse(saved));
     }
   }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!query.trim() || query.length < 3) return;
+
+    // Cancel any pending debounce
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    setLoading(true);
+    setSearchedFor(query);
+
+    debounceRef.current = setTimeout(async () => {
+      const response = await fetch(
+        `https://www.omdbapi.com/?s=${query}&apikey=fc847093`,
+      );
+      const data = await response.json();
+      setResult(data);
+      setLoading(false);
+    }, 500);
+  };
+
+  const clearSearch = () => {
+    setQuery("");
+    setResult({});
+    setSearchedFor("");
+  };
 
   const saveMovie = (movie) => {
     setWatchlist((prev) => {
@@ -38,52 +55,87 @@ export default function Home() {
     });
   };
 
+  const isSaved = (id) => watchlist.some((m) => m.imdbID === id);
+
   return (
     <div className="app">
       <header className="header">
         <h1 className="logo">Save your Movie</h1>
         <Link to="/watchlist" className="watchlist-link">
-          <button className="watchlist-btn">Go to Watchlist</button>
+          <button className="watchlist-btn">
+            Watchlist {watchlist.length > 0 && `(${watchlist.length})`}
+          </button>
         </Link>
-        <form className="search-form" onSubmit={handleSubmit}>
-          <input
-            className="search-input"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search movies..."
-          />
-        </form>
       </header>
 
-      <main className="results-grid">
-        {result.Search &&
-          result.Search.map((res) => {
-            return (
-              <div className="movie-card" key={res.imdbID}>
-                {res.Poster !== "N/A" ? (
-                  <img
-                    className="movie-poster"
-                    src={res.Poster}
-                    alt={res.Title}
-                  />
-                ) : (
-                  <div className="no-poster">No Poster</div>
-                )}
-                <div className="movie-info">
-                  <h4 className="movie-title">{res.Title}</h4>
-                  <p className="movie-meta">
-                    {res.Year} · {res.Type}
-                  </p>
-                  <button className="save-btn" onClick={() => saveMovie(res)}>
-                    {watchlist.some((m) => m.imdbID === res.imdbID)
-                      ? "Saved"
-                      : "Watchlater"}
-                  </button>
-                </div>
+      <section className="hero">
+        <p className="hero-tagline">Discover & Save</p>
+        <h2 className="hero-title">
+          Find your next <span>favorite</span> film
+        </h2>
+        <div className="search-container">
+          <form className="search-form" onSubmit={handleSearch}>
+            <input
+              className="search-input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search movies..."
+            />
+            {query && (
+              <button type="button" className="clear-btn" onClick={clearSearch}>
+                ×
+              </button>
+            )}
+            <button type="submit" className="search-btn">
+              Search
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {loading && (
+        <div className="loading">
+          <div className="loading-spinner" />
+          <p>Searching for "{searchedFor}"...</p>
+        </div>
+      )}
+
+      {!loading && result.Response === "False" && (
+        <div className="no-results">
+          <h3>No movies found for "{searchedFor}"</h3>
+          <p>Try a different search term</p>
+        </div>
+      )}
+
+      {!loading && result.Search && (
+        <main className="results-grid">
+          {result.Search.map((res) => (
+            <div className="movie-card" key={res.imdbID}>
+              {res.Poster !== "N/A" ? (
+                <img
+                  className="movie-poster"
+                  src={res.Poster}
+                  alt={res.Title}
+                />
+              ) : (
+                <div className="no-poster">No Poster</div>
+              )}
+              <div className="movie-info">
+                <h4 className="movie-title">{res.Title}</h4>
+                <p className="movie-meta">
+                  {res.Year} · {res.Type}
+                </p>
+                <button
+                  className={`save-btn ${isSaved(res.imdbID) ? "saved" : ""}`}
+                  onClick={() => saveMovie(res)}
+                >
+                  {isSaved(res.imdbID) ? "Saved" : "Watchlater"}
+                </button>
               </div>
-            );
-          })}
-      </main>
+            </div>
+          ))}
+        </main>
+      )}
     </div>
   );
 }
