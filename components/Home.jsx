@@ -29,6 +29,9 @@ export default function Home() {
 
   const saveMovie = (movie) => {
     setWatchlist((prev) => {
+      if (prev.some((m) => m.imdbID === movie.imdbID)) {
+        return prev;
+      }
       const updated = [...prev, movie];
       localStorage.setItem("watchlist", JSON.stringify(updated));
       return updated;
